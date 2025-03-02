@@ -13,10 +13,11 @@ import (
 
 // ReadMetaFile reads the data from the meta file for the given outbox log file
 func ReadMetaFile(path string) (Meta, error) {
-	meta := Meta{OutboxPath: path, MetaPath: &path}
+	metaPath := path + ".meta.json"
+	meta := Meta{OutboxPath: path, MetaPath: &metaPath}
 
 	// Open the meta data file
-	file, err := os.Open(path + ".meta.json")
+	file, err := os.Open(metaPath)
 	if err != nil {
 		return meta, fmt.Errorf("failed to open meta data file: %w", err)
 	}
