@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,7 +25,7 @@ var configSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		switch args[0] {
 		case "api-url":
-			viper.Set("api_url", args[1])
+			viper.Set("api_url", strings.TrimSuffix(args[1], "/"))
 		default:
 			return errors.New("invalid key")
 		}
