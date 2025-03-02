@@ -47,15 +47,27 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	viper.AddConfigPath("$HOME")
-	viper.AddConfigPath(".")
-	viper.SetConfigName(".loggernaut-cli")
+	home := os.ExpandEnv("$HOME/.loggernaut-cli/")
+	if err := os.MkdirAll(home, 0755); err != nil {
+		panic(fmt.Errorf("failed to make directories along '%s': %w", home, err))
+	}
+	i, err := os.Stat(home)
+	if err != nil {
+		panic(fmt.Errorf("failed to stat '%s': %w", home, err))
+	}
+	if !i.IsDir() {
+		panic(fmt.Errorf("'%s' is not a directory", home))
+	}
+	viper.AddConfigPath(home)
+	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
 	viper.SetDefault("sources", []string{})
-	viper.SafeWriteConfig()
+	if err := viper.SafeWriteConfig(); err != nil {
+		panic(fmt.Errorf("failed to create default config: %w", err))
+	}
 	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("fatal error in config file: %w", err))
+		panic(fmt.Errorf("failed to read config: %w", err))
 	}
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.loggernaut-cli.yaml)")
