@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
+	"strconv"
 
 	"github.com/jomla97/loggernaut-cli/config"
 	"github.com/spf13/cobra"
@@ -40,7 +42,7 @@ var sourcesListCmd = &cobra.Command{
 			if i > 0 {
 				fmt.Println()
 			}
-			fmt.Printf("Source %d\n", i+1)
+			fmt.Printf("Source %d\n", i)
 			fmt.Printf("System: %s\n", source.System)
 			fmt.Printf("Path: %s\n", source.Path)
 			fmt.Printf("Tags: %s\n", source.Tags)
@@ -95,23 +97,13 @@ var sourcesRemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "Remove a configured source.",
 	Long:  `Remove a configured source.`,
-	Args:  cobra.NoArgs,
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Get the source path
-		p, err := cmd.Flags().GetString("path")
+		index, err := strconv.Atoi(args[0])
 		if err != nil {
-			return err
-		}
-
-		// Get the source index
-		i, err := cmd.Flags().GetInt("index")
-		if err != nil {
-			return err
-		}
-
-		// Check that either the path or index flag is provided
-		if p == "" && i <= 0 {
-			return errors.New("either the path or index flag must be provided")
+			return fmt.Errorf("invalid index %s: must be a positive integer", args[0])
+		} else if index < 0 {
+			return errors.New("index must be a positive integer")
 		}
 
 		// Get the configured sources
@@ -120,21 +112,13 @@ var sourcesRemoveCmd = &cobra.Command{
 			return err
 		}
 
-		// Remove the source
-		var newSources []config.Source
-		for j, source := range sources {
-			if (p != "" && source.Path == p) || (i > 0 && i-1 == j) {
-				continue
-			}
-			newSources = append(newSources, source)
-		}
-
-		if len(newSources) == len(sources) {
-			return errors.New("source not found")
+		// Check if the index is out of range
+		if index >= len(sources) {
+			return fmt.Errorf("index out of range: %d", index)
 		}
 
 		// Write the updated sources to the config file
-		return config.SetSources(newSources)
+		return config.SetSources(slices.Delete(sources, index, index+1))
 	},
 }
 
