@@ -27,7 +27,7 @@ var collectCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Printf("Successfully collected %d log files.\n", collected)
+		fmt.Printf("Successfully collected %d log file(s).\n", collected)
 		return nil
 	},
 }

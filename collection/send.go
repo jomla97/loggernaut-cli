@@ -20,19 +20,21 @@ type ApiErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// SendAll sends all log files in the outbox folder to the Loggernaut API
-func SendAll(debug bool) error {
+// SendAll sends all log files in the outbox folder to the Loggernaut API, returning the number of logs sent
+func SendAll(debug bool) (int, error) {
 	files, err := walkOutbox()
 	if err != nil {
-		return err
+		return 0, err
 	}
+	var sent int
 	for _, file := range files {
 		err := Send(file, debug)
 		if err != nil {
-			return err
+			return sent, err
 		}
+		sent++
 	}
-	return nil
+	return sent, nil
 }
 
 // Send sends the log file at the specified path to the Loggernaut API
