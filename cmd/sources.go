@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/jomla97/loggernaut-cli/config"
+	"github.com/jomla97/loggernaut-cli/collection"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ var sourcesListCmd = &cobra.Command{
 	Long:  `List all configured sources.",`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Get the configured sources
-		sources, err := config.GetAllSources()
+		sources, err := collection.GetAllSources()
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ var sourcesAddCmd = &cobra.Command{
 	Long:  `Add a new source.`,
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		source := config.Source{System: args[0], Path: args[1]}
+		source := collection.Source{System: args[0], Path: args[1]}
 
 		// Check if the source is valid
 		if source.System == "" || source.Path == "" {
@@ -82,7 +82,7 @@ var sourcesAddCmd = &cobra.Command{
 		}
 
 		// Get the configured sources
-		sources, err := config.GetAllSources()
+		sources, err := collection.GetAllSources()
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ var sourcesAddCmd = &cobra.Command{
 		}
 
 		// Write the updated sources to the config file
-		return config.SetSources(append(sources, source))
+		return collection.SetSources(append(sources, source))
 	},
 }
 
@@ -114,7 +114,7 @@ var sourcesRemoveCmd = &cobra.Command{
 		}
 
 		// Get the configured sources
-		sources, err := config.GetAllSources()
+		sources, err := collection.GetAllSources()
 		if err != nil {
 			return err
 		}
@@ -125,7 +125,7 @@ var sourcesRemoveCmd = &cobra.Command{
 		}
 
 		// Write the updated sources to the config file
-		return config.SetSources(slices.Delete(sources, index, index+1))
+		return collection.SetSources(slices.Delete(sources, index, index+1))
 	},
 }
 
@@ -137,6 +137,6 @@ var sourcesClearCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Write an empty list of sources to the config file
-		return config.SetSources([]config.Source{})
+		return collection.SetSources([]collection.Source{})
 	},
 }

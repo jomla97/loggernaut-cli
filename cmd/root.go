@@ -31,6 +31,7 @@ func Execute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(sourcesCmd)
 	rootCmd.AddCommand(collectCmd)
+	rootCmd.AddCommand(sendCmd)
 
 	// Add subcommands to sources command
 	sourcesCmd.AddCommand(sourcesListCmd)
@@ -77,4 +78,5 @@ func init() {
 	// when this action is called directly.
 	sourcesAddCmd.Flags().StringSliceP("tags", "t", []string{}, "Tags to associate with the source")
 	sourcesAddCmd.Flags().Bool("no-recursive", false, "Walk the source directory recursively")
+	sendCmd.Flags().Bool("debug", false, "Enable debug mode, dumping request and response data")
 }
