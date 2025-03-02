@@ -37,7 +37,6 @@ func Execute() {
 	// Add subcommands to sources command
 	configCmd.AddCommand(configGetCmd)
 	configCmd.AddCommand(configSetCmd)
-	configSetCmd.AddCommand(configSetApiUrlCmd)
 	sourcesCmd.AddCommand(sourcesListCmd)
 	sourcesCmd.AddCommand(sourcesAddCmd)
 	sourcesCmd.AddCommand(sourcesRemoveCmd)

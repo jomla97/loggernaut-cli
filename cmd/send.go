@@ -20,7 +20,7 @@ var sendCmd = &cobra.Command{
 		if sent == 0 {
 			fmt.Println("No logs to send")
 		} else {
-			fmt.Printf("Sent %d log file(s).\n", sent)
+			fmt.Printf("Successfully sent %d log file(s).\n", sent)
 		}
 		return nil
 	},
