@@ -10,7 +10,6 @@ import (
 	"net/http/httputil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/jomla97/loggernaut-cli/config"
 	"github.com/spf13/viper"
@@ -38,9 +37,9 @@ func SendAll(debug bool) (int, error) {
 }
 
 // Send sends the log file at the specified path to the Loggernaut API
-func Send(path string, debug bool) error {
+func Send(logPath string, debug bool) error {
 	// Open the source file
-	file, err := os.Open(path)
+	file, err := os.Open(logPath)
 	if err != nil {
 		return fmt.Errorf("failed to open source file: %w", err)
 	}
@@ -53,7 +52,7 @@ func Send(path string, debug bool) error {
 	}
 
 	// Get the meta data
-	meta, err := ReadMetaFile(path)
+	meta, err := ReadMetaFile(logPath)
 	if err != nil {
 		return err
 	}
@@ -62,22 +61,35 @@ func Send(path string, debug bool) error {
 	reqBody := new(bytes.Buffer)
 	form := multipart.NewWriter(reqBody)
 
-	// Create a form part for the log file
-	part, err := form.CreateFormFile("log", filepath.Base(path))
-	if err != nil {
-		return fmt.Errorf("failed to create form part: %v", err.Error())
+	// Create a list of form files
+	formFiles := []struct {
+		Fieldname string
+		Filename  string
+		Data      []byte
+	}{
+		{"log", filepath.Base(logPath), log.Bytes()},
+		{"meta", filepath.Base(*meta.MetaPath), meta.Bytes()},
 	}
 
-	// Write the file data to the form part
-	if _, err := part.Write(log.Bytes()); err != nil {
-		return fmt.Errorf("failed to write to form part: %w", err)
+	// Add the form files to the form writer
+	for _, f := range formFiles {
+		// Create a form part for the file
+		part, err := form.CreateFormFile(f.Fieldname, f.Filename)
+		if err != nil {
+			return fmt.Errorf("failed to create form part: %v", err.Error())
+		}
+
+		// Write the file data to the form part
+		if _, err := part.Write(f.Data); err != nil {
+			return fmt.Errorf("failed to write to form part: %w", err)
+		}
 	}
 
 	// Close the form writer
 	form.Close()
 
 	// Create http request
-	req, err := http.NewRequest("POST", viper.GetString("api_url"), reqBody)
+	req, err := http.NewRequest("POST", viper.GetString("api_url")+"/ingest", reqBody)
 	if err != nil {
 		return err
 	}
@@ -86,9 +98,6 @@ func Send(path string, debug bool) error {
 	req.Header.Add("User-Agent", "loggernaut-cli/v"+config.Version)
 	req.Header.Add("Content-Type", form.FormDataContentType())
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("X-File-System-Path", meta.OriginalPath)
-	req.Header.Add("X-System", meta.Source.System)
-	req.Header.Add("X-Tags", strings.Join(meta.Source.Tags, ","))
 
 	// Dump the request if debugging is enabled
 	if debug {
@@ -126,7 +135,7 @@ func Send(path string, debug bool) error {
 	}
 
 	// Remove the log file and meta file
-	for _, file := range []string{path, *meta.MetaPath} {
+	for _, file := range []string{logPath, *meta.MetaPath} {
 		err := os.Remove(file)
 		if err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("failed to remove file: %w", err)

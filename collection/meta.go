@@ -29,6 +29,9 @@ func ReadMetaFile(path string) (Meta, error) {
 		return meta, fmt.Errorf("failed to copy data from meta data file: %w", err)
 	}
 
+	// Save the raw bytes
+	meta.raw = buf.Bytes()
+
 	// Unmarshal the meta data
 	err = json.Unmarshal(buf.Bytes(), &meta)
 	if err != nil {
@@ -42,6 +45,12 @@ type Meta struct {
 	OriginalPath string  `json:"path"`
 	OutboxPath   string  `json:"-"`
 	MetaPath     *string `json:"-"`
+	raw          []byte  `json:"-"`
+}
+
+// Bytes returns the raw bytes of the meta data
+func (m *Meta) Bytes() []byte {
+	return m.raw
 }
 
 // createMetaFile creates a meta file for the given log file
