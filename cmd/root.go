@@ -29,11 +29,15 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	// Add subcommands to root command
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(sourcesCmd)
 	rootCmd.AddCommand(collectCmd)
 	rootCmd.AddCommand(sendCmd)
 
 	// Add subcommands to sources command
+	configCmd.AddCommand(configGetCmd)
+	configCmd.AddCommand(configSetCmd)
+	configSetCmd.AddCommand(configSetApiUrlCmd)
 	sourcesCmd.AddCommand(sourcesListCmd)
 	sourcesCmd.AddCommand(sourcesAddCmd)
 	sourcesCmd.AddCommand(sourcesRemoveCmd)
