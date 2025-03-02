@@ -53,7 +53,7 @@ var sourcesListCmd = &cobra.Command{
 
 // sourcesAddCmd represents the add subcommand of the sources command
 var sourcesAddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add <system> <path>",
 	Short: "Add a new source.",
 	Long:  `Add a new source.`,
 	Args:  cobra.ExactArgs(2),
@@ -72,6 +72,13 @@ var sourcesAddCmd = &cobra.Command{
 			return err
 		} else {
 			source.Tags = tags
+		}
+
+		// Get the source tags
+		if noRecursive, err := cmd.Flags().GetBool("no-recursive"); err != nil {
+			return err
+		} else {
+			source.Recursive = !noRecursive
 		}
 
 		// Get the configured sources

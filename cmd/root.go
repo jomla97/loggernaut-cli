@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jomla97/loggernaut-cli/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,6 +30,7 @@ func Execute() {
 	// Add subcommands to root command
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(sourcesCmd)
+	rootCmd.AddCommand(collectCmd)
 
 	// Add subcommands to sources command
 	sourcesCmd.AddCommand(sourcesListCmd)
@@ -47,25 +49,24 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	home := os.ExpandEnv("$HOME/.loggernaut-cli/")
-	if err := os.MkdirAll(home, 0755); err != nil {
-		panic(fmt.Errorf("failed to make directories along '%s': %w", home, err))
+	for _, dir := range []string{config.BasePath, config.OutboxPath} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(fmt.Errorf("failed to make directory '%s': %w", dir, err))
+		}
 	}
-	i, err := os.Stat(home)
+	i, err := os.Stat(config.BasePath)
 	if err != nil {
-		panic(fmt.Errorf("failed to stat '%s': %w", home, err))
+		panic(fmt.Errorf("failed to stat '%s': %w", config.BasePath, err))
 	}
 	if !i.IsDir() {
-		panic(fmt.Errorf("'%s' is not a directory", home))
+		panic(fmt.Errorf("'%s' is not a directory", config.BasePath))
 	}
-	viper.AddConfigPath(home)
+	viper.AddConfigPath(config.BasePath)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
 	viper.SetDefault("sources", []string{})
-	if err := viper.SafeWriteConfig(); err != nil {
-		panic(fmt.Errorf("failed to create default config: %w", err))
-	}
+	viper.SafeWriteConfig()
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("failed to read config: %w", err))
 	}
@@ -75,4 +76,5 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	sourcesAddCmd.Flags().StringSliceP("tags", "t", []string{}, "Tags to associate with the source")
+	sourcesAddCmd.Flags().Bool("no-recursive", false, "Walk the source directory recursively")
 }

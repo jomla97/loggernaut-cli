@@ -2,15 +2,21 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/spf13/viper"
 )
 
+var BasePath = os.ExpandEnv("$HOME/.loggernaut-cli")
+var OutboxPath = path.Join(BasePath, "outbox")
+
 // Source represents a log source
 type Source struct {
-	System string
-	Path   string
-	Tags   []string
+	System    string   `json:"system"`
+	Path      string   `json:"path"`
+	Tags      []string `json:"tags"`
+	Recursive bool     `json:"recursive"`
 }
 
 // GetAllSources returns all configured sources
