@@ -28,6 +28,13 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	// Add subcommands to root command
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(sourcesCmd)
+
+	// Add subcommands to sources command
+	sourcesCmd.AddCommand(sourcesListCmd)
+	sourcesCmd.AddCommand(sourcesAddCmd)
+	sourcesCmd.AddCommand(sourcesRemoveCmd)
+	sourcesCmd.AddCommand(sourcesClearCmd)
 
 	// Execute root command
 	err := rootCmd.Execute()
@@ -45,6 +52,7 @@ func init() {
 	viper.SetConfigName(".loggernaut-cli")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
+	viper.SetDefault("sources", []string{})
 	viper.SafeWriteConfig()
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error in config file: %w", err))
