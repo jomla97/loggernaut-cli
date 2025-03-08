@@ -89,7 +89,7 @@ func Send(logPath string, debug bool) error {
 	form.Close()
 
 	// Create http request
-	req, err := http.NewRequest("POST", viper.GetString("api_url")+"/ingest", reqBody)
+	req, err := http.NewRequest("POST", viper.GetString("api_url")+"/log", reqBody)
 	if err != nil {
 		return err
 	}
