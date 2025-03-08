@@ -1,7 +1,6 @@
 package collection
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,18 +21,17 @@ func ReadMetaFile(path string) (Meta, error) {
 		return meta, fmt.Errorf("failed to open meta data file: %w", err)
 	}
 
-	// Copy the file data to a buffer
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, file)
+	// Read the meta file
+	data, err := io.ReadAll(file)
 	if err != nil {
-		return meta, fmt.Errorf("failed to copy data from meta data file: %w", err)
+		return meta, fmt.Errorf("failed to read meta file: %w", err)
 	}
 
 	// Save the raw bytes
-	meta.raw = buf.Bytes()
+	meta.raw = data
 
 	// Unmarshal the meta data
-	err = json.Unmarshal(buf.Bytes(), &meta)
+	err = json.Unmarshal(data, &meta)
 	if err != nil {
 		return meta, fmt.Errorf("failed to unmarshal meta data: %w", err)
 	}
